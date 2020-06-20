@@ -33,10 +33,11 @@ try {
         }
         const origin = '/blog/category/example';
         await page.setDefaultNavigationTimeout(0);
+        let hrefs1, nextPageLink;
         const options = {waitUntil: 'networkidle2', timeout: 0};
         const url = `${baseUrl}${origin}`;
         await page.goto(url, options);
-        let hrefs1 = await page.evaluate(
+        hrefs1 = await page.evaluate(
             () => Array.from(
                 document.querySelectorAll('.journal-entry-navigation-current'),
                 a => a.getAttribute('href')
@@ -47,10 +48,7 @@ try {
             if(!savedToPdf.includes(hrefs1[i])) {
                 newUrl = `${baseUrl}${hrefs1[i]}`
                 await page.goto(newUrl, options);
-                console.log(page.url());
                 const filePath = `${baseFilePath}/${hrefs1[i].replace(/\//g, '-').slice(1,hrefs1[i].length).split('.')[0]}`;
-                console.log(`${hrefs1[i].replace(/\//g, '-').slice(1,hrefs1[i].length).split('.')[0]}`);
-                console.log('----');
                 await page.pdf({
                     path: `${filePath}.pdf`,
                     format: 'A4'
@@ -60,7 +58,7 @@ try {
             }
         }
         await page.goto(url, options);
-        let nextPageLink = await page.evaluate(
+        nextPageLink = await page.evaluate(
             () => Array.from(
                 document.querySelectorAll('.paginationControlNextPageSuffix a[href]'),
                 a => a.getAttribute('href')
@@ -68,23 +66,18 @@ try {
         );
 
         while (nextPageLink && nextPageLink[0]) {
-            console.log("inside while", nextPageLink[0]);
             await page.goto(`${baseUrl + nextPageLink[0]}`, options);
-            console.log(page.url());
             hrefs1 = await page.evaluate(
                 () => Array.from(
                     document.querySelectorAll('.journal-entry-navigation-current'),
                     a => a.getAttribute('href')
                 )
             );
-            // console.log(nextPageLink[0], hrefs1);
             for(let i=0;i <hrefs1.length; i++) {
                 let newUrl;
                 if(!savedToPdf.includes(hrefs1[i])) {
                     newUrl = `${baseUrl}${hrefs1[i]}`;
                     await page.goto(newUrl, options);
-                    console.log(page.url());
-                    console.log(`${hrefs1[i].replace(/\//g, '-').slice(1,hrefs1[i].length).split('.')[0]}`);
                     const filePath = `${baseFilePath}/${hrefs1[i].replace(/\//g, '-').slice(1,hrefs1[i].length).split('.')[0]}`;
                     await page.pdf({
                         format: 'A4',
@@ -102,7 +95,6 @@ try {
                     a => a.getAttribute('href')
                 )
             );
-            console.log(nextPageLink[0]);
         }
         await browser.close();
     })().then(async () => {
