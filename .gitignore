@@ -1,4 +1,4 @@
-./pdfs/
+pdfs/
 .idea/
-./saved_pdfs.txt
+saved_pdfs.txt
 node_modules/
