@@ -16,12 +16,16 @@ const logFileName = 'saved_pdfs.txt';
 const getHrefsAndNextPage = async (page, url, logFilePointer, savedToPdf) => {
     console.log('Page url: ' + url);
     await page.goto(url, options);
+
+    // get all links of particular class from page
     const hrefs = await page.evaluate(
         () => Array.from(
             document.querySelectorAll('.journal-entry-navigation-current'),
             a => a.getAttribute('href')
         )
     );
+
+    // loop through links and convert to pdf
     for (let i = 0; i < hrefs.length; i++) {
         let newUrl;
         if (!savedToPdf.includes(hrefs[i])) {
@@ -37,7 +41,11 @@ const getHrefsAndNextPage = async (page, url, logFilePointer, savedToPdf) => {
             savedToPdf.push(hrefs[i]);
         }
     }
+
+    // return to list page after converting list links to pdf
     await page.goto(url, options);
+
+    // return url of next page
     return await page.evaluate(
         () => Array.from(
             document.querySelectorAll('.paginationControlNextPageSuffix a[href]'),
